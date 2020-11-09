@@ -13,12 +13,15 @@ The other table is referred to as communes-departements-regions.csv and can be d
 
 A typical result is shown below.
 
-![Map with dots for Debussy](https://raw.githubusercontent.com/Joulik/BasicDigitalSteganography/master/snapshot.png)
+![Map with dots for Debussy](https://raw.githubusercontent.com/Joulik/Street_Name_Analysis/master/Debussy-point.png)
 
 2.street_name_analysis_density.py
 
 The user is asked for a street name. The script returns the total number of streets with this street name per region and shows the result on a map. A typical result is shown below.
-![Density map for Debussy](https://raw.githubusercontent.com/Joulik/BasicDigitalSteganography/master/snapshot.png)
+
+![Result on console](https://raw.githubusercontent.com/Joulik/Street_Name_Analysis/master/ConsoleDensity.png)
+
+![Density map for Debussy](https://raw.githubusercontent.com/Joulik/Street_Name_Analysis/master/Debussy-density.png)
 
 External packages required
 --------------------------
