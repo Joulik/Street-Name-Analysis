@@ -16,47 +16,74 @@ conn = pg2.connect(database='Adresses-France', user='postgres',password='topSQL'
 
 # PostgreSQL query
 query = '''
-  SELECT COUNT(aa.nom_comm),aa.nom_region
-	FROM
-		(SELECT DISTINCT(fr.nom_comm),fr.voie,fr.code_post,
+      SELECT DISTINCT(fr.nom_comm),fr.voie,fr.code_post,
         cdr.nom_region,cdr.latitude,cdr.longitude
-    	FROM france AS fr
+        FROM france AS fr
         JOIN communes_departement_region AS cdr
-	  	ON fr.nom_comm=cdr.nom_commune
-        AND fr.code_post=cdr.code_postal
-      WHERE fr.voie LIKE {}) AS aa
-	GROUP BY aa.nom_region
-  ;
-  '''.format(street_name)
+	  ON fr.nom_comm=cdr.nom_commune AND fr.code_post=cdr.code_postal
+        WHERE fr.voie LIKE {}
+	  AND cdr.nom_region
+	  IN ('Auvergne-Rhône-Alpes',
+		'Bourgogne-Franche-Comté',
+		'Bretagne',
+		'Centre-Val de Loire',
+		'Corse',
+		'Grand Est',
+		'Hauts-de-France',
+		'Île-de-France',
+		'Pays de la Loire',
+		'Normandie',
+		'Nouvelle-Aquitaine',
+		'Occitanie',
+        'Provence-Alpes-Côte d''Azur')
+      ORDER BY cdr.nom_region
+        ;
+        '''.format(street_name)
 
 # Create data frame resulting from PostgreSQL query
 df = pd.read_sql_query(query, conn)
 
-# Select map of France
-france_map = gpd.read_file(r'C:\Users\Thirteen\Desktop\PYTHON\StreetNameAnalysisFRANCE\regions-20180101-shp\regions-20180101.shp')
+# Proceed if dataframe is not empty
+if not df.empty:
+	# Prepare geometry for geodataframe
+	geometry = gpd.points_from_xy(df.longitude, df.latitude)
+	gdf = gpd.GeoDataFrame(df, geometry=geometry)
 
-# Exclude oversea regions
-regions_to_exclude = ['Guadeloupe','Martinique','Guyane','La Réunion','Mayotte']
-ddf = pd.merge(france_map['nom'],
-               df[['count','nom_region']],
-               how='outer',
-               left_on='nom',
-               right_on='nom_region')[['count','nom']].fillna(0)
-ddf = ddf[~ddf['nom'].isin(regions_to_exclude)]
+	# Update coordinate reference system
+	gdf.set_crs(epsg=4326, inplace=True)
+	gdf.to_crs(epsg=3395)
 
-# Print counts of street name per region
-print(ddf)
+	# Display ten first matches
+	print('10 first hits')
+	print(df[['voie','nom_comm','code_post','nom_region']].head(10))
 
-# Prepare map of France
-france_map.set_crs(epsg=4326, inplace=True)
-france_map.to_crs(epsg=3395)
-france_map = france_map[~france_map['nom'].isin(regions_to_exclude)]
+	# Write results in csv file
+	file_name = '{}.csv'.format(street_name_title)
+	df[['voie','nom_comm','code_post','nom_region']].to_csv(file_name)
 
-# Plot and save picture of geodataframe
-ax = france_map.plot(column=ddf['count'], edgecolor='black', cmap='OrRd',vmin=0,legend=True)
-ax.set_xticks([])
-ax.set_yticks([])
-plt.title(street_name_title)
-file_name = '{}-density.png'.format(street_name_title)
-plt.savefig(fname=file_name,bbox_inches='tight',format='png',dpi=300)
-plt.show()
+	# Display the total number of matches
+	print("{} hits for that street name".format(len(gdf.index)))
+
+	# Prepare map of France
+	france_map = gpd.read_file(r'C:\Users\Thirteen\Desktop\PYTHON\StreetNameAnalysisFRANCE\regions-20180101-shp\regions-20180101.shp')
+
+	# Update coordinate reference system
+	france_map.set_crs(epsg=4326, inplace=True)
+	france_map.to_crs(epsg=3395)
+
+	# Exclude overseas regions
+	regions_to_exclude = ['Guadeloupe','Martinique','Guyane','La Réunion','Mayotte']
+	france_map = france_map[~france_map['nom'].isin(regions_to_exclude)]
+
+	# Plot and save picture of geodataframe in PNG file
+	ax = france_map.plot(color='white', edgecolor='black')
+	ax.set_xticks([])
+	ax.set_yticks([])
+	gdf.plot(ax=ax, color='red', markersize=5)
+	plt.title(street_name_title)	
+	file_name = '{}-point.png'.format(street_name_title)
+	plt.savefig(fname=file_name,bbox_inches='tight',format='png',dpi=300)
+	plt.show()
+# In case no result is found
+else:
+	print('No result found for your request')
