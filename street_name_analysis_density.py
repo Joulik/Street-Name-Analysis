@@ -12,7 +12,7 @@ street_name = "'%{}%'".format(street_name)
 print('Processing, please wait')
 
 # Connect to PosgreSQL database
-conn = pg2.connect(database='Adresses-France', user='postgres',password='topSQL')
+conn = pg2.connect(database='Adresses-France', user='xxxxx',password='xxxxx')
 
 # PostgreSQL query
 query = '''
