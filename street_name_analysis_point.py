@@ -18,7 +18,7 @@ conn = pg2.connect(database='Adresses-France', user='xxxxx',password='xxxxx')
 query = '''
       SELECT DISTINCT(fr.nom_comm),fr.voie,fr.code_post,
         cdr.nom_region,cdr.latitude,cdr.longitude
-        FROM france AS fr
+        FROM france_rues AS fr
         JOIN communes_departement_region AS cdr
 	  ON fr.nom_comm=cdr.nom_commune AND fr.code_post=cdr.code_postal
         WHERE fr.voie LIKE {}
