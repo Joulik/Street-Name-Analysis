@@ -8,8 +8,9 @@ This project has two scripts
 
 The user is asked for a street name. The script returns the number of streets having this name in France in a CSV file and shows them as red dots on a map.
 
-A PostgreSQL database with two tables is used. The first table is referred to as france in the SQL query and can be downloaded  from https://www.data.gouv.fr/en/datasets/base-d-adresses-nationale-ouverte-bano/
-The other table is referred to as communes-departements-regions and can be downloaded from https://www.data.gouv.fr/en/datasets/communes-de-france-base-des-codes-postaux/
+A PostgreSQL database with two tables is used. The first table is referred to as france_rues in the SQL query.
+It was constructed from the table called france using the PostgreSQL query called france_rues_from_france.sql. The table france_rues is much shorter and thus yields much faster execution of the SQL queries than with the full table france. The full table, which is in a csv file of about 1.7G can be downloaded from https://www.data.gouv.fr/en/datasets/base-d-adresses-nationale-ouverte-bano/.
+The other table is referred to as communes-departement-region and can be downloaded from https://www.data.gouv.fr/en/datasets/communes-de-france-base-des-codes-postaux/
 
 A typical result is shown below.
 
